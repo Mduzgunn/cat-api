@@ -18,7 +18,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 @Service
 public class CatService {
@@ -220,10 +219,11 @@ public class CatService {
     }
 
     /**
-     * Kullanıcı tarafından belirtilen dosya adını uygun bir formata getirir.
-     * Eğer kullanıcı tarafından belirtilen dosya adı yoksa, otomatik bir ad oluşturur.
+     * Kullanıcının belirttiği dosya adını uygun bir formata getirir. Eğer kullanıcı tarafından belirtilen dosya adı
+     * boş veya null ise, otomatik bir ad oluşturur.
      *
-     * @param userSpecifiedFileName Kullanıcı tarafından belirtilen dosya adı
+     * @param userSpecifiedFileName Kullanıcının belirttiği dosya adı
+     * @param directory            Dosyanın kaydedileceği dizin
      * @return Uygun bir dosya adı
      */
     protected String getFileName(String userSpecifiedFileName, String directory) {
@@ -235,8 +235,11 @@ public class CatService {
     }
 
     /**
-     * Benzersiz bir dosya adı oluşturan metod.
-     * @return Oluşturulan dosya adı.
+     * Belirtilen dizinde benzersiz bir dosya adı oluşturan metod.
+     *
+     * @param baseName  Temel dosya adı
+     * @param directory Dosyanın kaydedileceği dizin
+     * @return Oluşturulan benzersiz dosya adı
      */
     private String findUniqueFileName(String baseName, String directory) {
         AtomicInteger counter = new AtomicInteger(0);

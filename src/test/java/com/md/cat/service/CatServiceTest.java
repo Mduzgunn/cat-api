@@ -69,23 +69,28 @@ class CatServiceTest {
     public void shouldGenerateUniqueFileNameWhenUserSpecifiedFileNameIsNull() {
         // Given
         String userSpecifiedFileName = null;
+        String directory = "your_directory_path";
 
         // When
-        String fileName = catService.getFileName(userSpecifiedFileName);
+        String fileName = catService.getFileName(userSpecifiedFileName, directory);
 
         // Then
         assertTrue(fileName.endsWith(".jpg"));
-        assertFalse(Files.exists(Paths.get(baseDownloadPath, fileName)));
+        assertFalse(Files.exists(Paths.get(directory, fileName)));
     }
 
     @Test
     public void shouldGenerateValidFileNameWhenUserSpecifiedFileNameIsNotNull() {
+        // Given
         String userSpecifiedFileName = "kedi-resmi";
+        String directory = "your_directory_path";
 
-        String fileName = catService.getFileName(userSpecifiedFileName);
+        // When
+        String fileName = catService.getFileName(userSpecifiedFileName, directory);
 
+        // Then
         assertEquals(userSpecifiedFileName + ".jpg", fileName);
-        assertFalse(Files.exists(Paths.get(baseDownloadPath, fileName)));
+        assertFalse(Files.exists(Paths.get(directory, fileName)));
     }
 
     @Test
@@ -133,41 +138,6 @@ class CatServiceTest {
         // When, Then
         assertThrows(IOException.class, () -> catService.saveImageToFile(imageBytes, fileName, directory));
     }
-
- /*
-    @Test
-    public void shouldGetCustomSizedCatImage() throws IOException {
-        // Given
-        int width = 100;
-        int height = 200;
-        String fileName = "test.jpg";
-        String directory = "/path/to/dir";
-        byte[] expectedImageBytes = {};
-        String expectedImageUrl = "https://example.com/cat/100x200";
-
-        // Mock external dependencies
-        Mockito.when(catService.buildCustomSizeImageUrl(width, height)).thenReturn(expectedImageUrl);
-        Mockito.when(catService.downloadAndRetrieve(expectedImageUrl)).thenReturn(expectedImageBytes);
-        Mockito.when(catService.getFileName(fileName)).thenReturn("final_test.jpg");
-        Mockito.when(catService.saveImageToFile(expectedImageBytes, "final_test.jpg", directory))
-                .thenReturn(Paths.get("/path/to/dir/final_test.jpg"));
-
-        // When
-        byte[] actualImageBytes = catService.getCustomSizedCatImage(width, height, fileName, directory);
-
-        // Then
-        assertArrayEquals(expectedImageBytes, actualImageBytes);
-        Mockito.verify(catService.buildCustomSizeImageUrl(width, height));
-        Mockito.verify(catService.downloadAndRetrieve(expectedImageUrl));
-        Mockito.verify(catService.getFileName(fileName));
-        Mockito.verify(catService.saveImageToFile(expectedImageBytes, "final_test.jpg", directory));
-        Mockito.verify(catService.saveCatToRepository(
-                "final_test.jpg",
-                ContentFormat.Tag,
-                "/path/to/dir/final_test.jpg",
-                "width: 100 height: 200"));
-    }
-*/
 
 }
 

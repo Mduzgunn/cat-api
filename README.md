@@ -29,7 +29,7 @@ Uygulamayı yerel makinenizde çalıştırmak için aşağıdaki adımları taki
 
 Uygulama başladığında, aşağıdaki endpoint'lere HTTP istekleri yapabilirsiniz.
 
-### Özel Boyutlu Kedi Resmi Al
+### Özel Boyutlu Kedi Resmi
 
 **Endpoint:**
 GET /api/cat/custom?width={width}&height={height}&fileName={fileName}&directory={directory}
@@ -47,7 +47,7 @@ GET /api/cat/custom?width=300&height=200&fileName=my_custom_cat.jpg&directory=/p
 
 
 
-### Etiketlenmiş Kedi Resmi Al
+### Etiketlenmiş Kedi Resmi
 
 **Endpoint:**
 GET /api/cat/tagged?tag={tag}&fileName={fileName}&directory={directory}
@@ -61,7 +61,7 @@ GET /api/cat/tagged?tag={tag}&fileName={fileName}&directory={directory}
 GET /api/cat/tagged?tag=cute&fileName=cute_cat.jpg&directory=/path/to/save
 
 
-### Metin İçeren Kedi Resmi Al
+### Metin İçeren Kedi Resmi
 
 **Endpoint:**
 GET /api/cat/textual?text={text}&fileName={fileName}&directory={directory}
@@ -74,3 +74,24 @@ GET /api/cat/textual?text={text}&fileName={fileName}&directory={directory}
 
 **Örnek Kullanım:**
 GET /api/cat/textual?text=HelloCat&fileName=text_cat.jpg&directory=/path/to/save
+
+**Endpoint:**
+POST http://localhost:8080/api/clean/perform?directory={directory}
+
+**Parametreler:**
+- `directory` (opsiyonel): Silinecek dosyanın kaydedileceği dizin
+
+**Örnek Kullanım:**
+POST http://localhost:8080/api/clean/perform?directory=b
+
+### Görseller
+![](src/main/resources/app-images/appSS.png "main page")
+
+**Veri listesi:**
+![](src/main/resources/app-images/appSSdb.png "app db list")
+
+**PostgreSQL:**
+![](src/main/resources/app-images/dbSS.png "db")
+
+**Coverage Results:**
+![](src/main/resources/app-images/coverageResult.png "coverage")
