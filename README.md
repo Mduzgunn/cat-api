@@ -2,6 +2,16 @@
 
 Bu uygulama, farklı kedi resimleri almak ve bu resimlere özel işlemler yapmak için kullanılan bir Spring Boot projesidir.
 
+## Kullanılan Teknolojiler
+
+- Java 17
+- Spring Boot
+- PostgreSQL
+- Spring Data JPA
+- Mockito
+- Lombok
+
+
 ## Başlangıç
 
 Uygulamayı yerel makinenizde çalıştırmak için aşağıdaki adımları takip edin.
