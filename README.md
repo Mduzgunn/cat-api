@@ -85,6 +85,8 @@ GET /api/cat/textual?text={text}&fileName={fileName}&directory={directory}
 **Örnek Kullanım:**
 GET /api/cat/textual?text=HelloCat&fileName=text_cat.jpg&directory=/path/to/save
 
+### İstenilen Dizindeki ***(3 seçenek)*** Görselleri Silme
+
 **Endpoint:**
 POST http://localhost:8080/api/clean/perform?directory={directory}
 
