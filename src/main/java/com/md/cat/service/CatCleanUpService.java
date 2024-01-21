@@ -21,17 +21,27 @@ public class CatCleanUpService {
 
     // Her gün saat 2:00'de çalışacak şekilde ayarlanmış zamanlayıcı
     @Scheduled(cron = "0 0 2 * * ?", zone = "GMT+3:00")
-    public void performCleanUp() {
+    public void performCleanUp(String path) {
         try {
             // Temizleme işlemini gerçekleştir
-            cleanUpDownloadFolder();
+            cleanUpDownloadFolder(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void cleanUpDownloadFolder() throws IOException {
+    private void cleanUpDownloadFolder(String selectedPath) throws IOException {
         Path downloadPath = Paths.get(baseDownloadPath);
+
+        if (selectedPath != null) {
+            if(selectedPath.equals("a")) {
+                downloadPath =  Paths.get(baseDownloadPath + "\\adizini");;
+            } else if (selectedPath.equals("b")){
+                downloadPath =  Paths.get(baseDownloadPath + "\\bdizini");;
+            }  else if (selectedPath.equals("c")){
+                downloadPath =  Paths.get(baseDownloadPath + "\\cdizini");;
+            }
+        }
 
         // Silinecek dosyaların sınırı: 7 gün öncesinden öncekileri silme
         //LocalDateTime boundaryDateTime = LocalDateTime.now().minusDays(7);

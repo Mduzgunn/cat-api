@@ -13,13 +13,14 @@ public class CatDtoConverter {
         return new CatDto(
                 from.getId(),
                 from.getName(),
+                from.getContentFormat(),
                 from.getValue(),
                 from.getPath(),
                 from.getCreationDate()
         );
     }
 
-    public List<CatDto> convertToMatchDtoList(List<Cat> matchList) {
+    public List<CatDto> convertToCatDtoList(List<Cat> matchList) {
         return matchList
                 .stream()
                 .map(this::convert)

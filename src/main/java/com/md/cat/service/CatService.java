@@ -1,5 +1,7 @@
 package com.md.cat.service;
 
+import com.md.cat.dto.CatDto;
+import com.md.cat.dto.converter.CatDtoConverter;
 import com.md.cat.entity.Cat;
 import com.md.cat.enums.ContentFormat;
 import com.md.cat.repository.CatRepository;
@@ -13,8 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -26,16 +28,25 @@ public class CatService {
     @Value("${variable.cat-external-client-url}")
     private String catExternalClientUrl;
     private final CatRepository catRepository;
+    private final CatDtoConverter catDtoConverter;
 
-    public CatService(CatRepository catRepository) {
+    public CatService(CatRepository catRepository, CatDtoConverter catDtoConverter) {
         this.catRepository = catRepository;
+        this.catDtoConverter = catDtoConverter;
+    }
+
+    protected List<Cat> getAllCats() {
+        return catRepository.findAll();
+    }
+
+    public List<CatDto> getAllCatDtoList() {
+        return catDtoConverter.convertToCatDtoList(getAllCats());
     }
 
     @PostConstruct
     private void initializeDownloadPath() throws IOException {
         // Eğer application.properties -> baseDownloadPath değeri null veya boşsa, JVM seçeneğini kontrol et
         if (baseDownloadPath == null || baseDownloadPath.isBlank()) {
-            // JVM seçeneğini kontrol et
             String customDownloadPath = System.getProperty("baseDownloadPathJVM");
 
             // Eğer JVM seçeneği belirlenmişse ve geçerli bir dizinse kullan
@@ -92,17 +103,7 @@ public class CatService {
                 .toUriString();
     }
 
-    /**
-     * Benzersiz bir dosya adı oluşturan metod.
-     * @return Oluşturulan dosya adı.
-     */
-    private String generateUniqueFileName() {
-        AtomicInteger counter = new AtomicInteger(0);
-        return Stream.iterate("cat_image.jpg", name -> "cat_image(" + counter.incrementAndGet() + ").jpg")
-                .filter(name -> !Files.exists(Paths.get(baseDownloadPath, name)))
-                .findFirst()
-                .orElseThrow(); // Uygun bir dosya adı bulunamazsa isteğe bağlı olarak hata fırlatılabilir.
-    }
+
 
     /**
      * Belirtilen byte dizisini dosyaya kaydeden metod.
@@ -129,13 +130,39 @@ public class CatService {
      */
     protected void saveCatToRepository(String fileName, ContentFormat contentFormat, String filePath, String catValue) {
         Cat cat = new Cat();
-        //cat.setId(UUID.randomUUID().toString());
         cat.setName(fileName);
         cat.setValue(catValue);
         cat.setContentFormat(contentFormat);
         cat.setPath(filePath);
         catRepository.save(cat);
     }
+
+    /**
+     * Belirtilen dizini temsil eden özel bir dizin yolu elde eder.
+     *
+     * @param directory "a", "b", veya "c" olarak belirtilen dizin seçeneklerinden biri.
+     * @return Parametre ile değer verilmişse tanımlı olarak bir path döner.
+     *         Geçersiz bir seçenek durumunda, temel indirme yolunu içeren bir path döner.
+     */
+    public String getCustomDirectory(String directory) {
+        String customDirectory = baseDownloadPath;
+
+        switch (directory) {
+            case "a":
+                customDirectory += "\\adizini";
+                break;
+            case "b":
+                customDirectory += "\\bdizini";
+                break;
+            case "c":
+                customDirectory += "\\cdizini";
+                break;
+            default:
+                // Do nothing
+        }
+        return customDirectory;
+    }
+
 
     /**
      * Belirli boyutlarda özel bir kedi resminin URL'sini oluşturan metod.
@@ -149,8 +176,9 @@ public class CatService {
     public byte[] getCustomSizedCatImage(int width, int height, String fileName, String directory) throws IOException {
         String imageUrl = buildCustomSizeImageUrl(width, height);
         byte[] imageBytes = downloadAndRetrieve(imageUrl);
-        String finalFileName = getFileName(fileName);
-        Path filePath = saveImageToFile(imageBytes, finalFileName, directory);
+        String custoDir = getCustomDirectory(directory);
+        String finalFileName = getFileName(fileName, custoDir);
+        Path filePath = saveImageToFile(imageBytes, finalFileName, custoDir);
         saveCatToRepository(finalFileName, ContentFormat.Custom, filePath.toString(), "width: " + width + " height: " + height);
         return imageBytes;
     }
@@ -166,8 +194,9 @@ public class CatService {
     public byte[] getTaggedCatImage(String tag, String fileName, String directory) throws IOException {
         String imageUrl = buildTaggedImageUrl(tag);
         byte[] imageBytes = downloadAndRetrieve(imageUrl);
-        String finalFileName = getFileName(fileName);
-        Path filePath = saveImageToFile(imageBytes, finalFileName, directory);
+        String custoDir = getCustomDirectory(directory);
+        String finalFileName = getFileName(fileName, custoDir);
+        Path filePath = saveImageToFile(imageBytes, finalFileName, custoDir);
         saveCatToRepository(finalFileName, ContentFormat.Tag, filePath.toString(), "tag: " + tag);
         return imageBytes;
     }
@@ -183,8 +212,9 @@ public class CatService {
     public byte[] getTextualCatImage(String text, String fileName, String directory) throws IOException {
         String imageUrl = buildTextualImageUrl(text);
         byte[] imageBytes = downloadAndRetrieve(imageUrl);
-        String finalFileName = getFileName(fileName);
-        Path filePath = saveImageToFile(imageBytes, finalFileName, directory);
+        String custoDir = getCustomDirectory(directory);
+        String finalFileName = getFileName(fileName, custoDir);
+        Path filePath = saveImageToFile(imageBytes, finalFileName, custoDir);
         saveCatToRepository(finalFileName, ContentFormat.Text, filePath.toString(), "text: " + text);
         return imageBytes;
     }
@@ -196,12 +226,27 @@ public class CatService {
      * @param userSpecifiedFileName Kullanıcı tarafından belirtilen dosya adı
      * @return Uygun bir dosya adı
      */
-    protected String getFileName(String userSpecifiedFileName) {
-        if (userSpecifiedFileName != null && !userSpecifiedFileName.isBlank()) {
-            return userSpecifiedFileName.endsWith(".jpg") ? userSpecifiedFileName : userSpecifiedFileName + ".jpg";
-        } else {
-            return generateUniqueFileName();
+    protected String getFileName(String userSpecifiedFileName, String directory) {
+        String baseName = (userSpecifiedFileName != null && !userSpecifiedFileName.isBlank()) ?
+                (userSpecifiedFileName.endsWith(".jpg") ? userSpecifiedFileName : userSpecifiedFileName + ".jpg") :
+                "cat_image.jpg";
+
+        return findUniqueFileName(baseName, directory);
+    }
+
+    /**
+     * Benzersiz bir dosya adı oluşturan metod.
+     * @return Oluşturulan dosya adı.
+     */
+    private String findUniqueFileName(String baseName, String directory) {
+        AtomicInteger counter = new AtomicInteger(0);
+        String fileNameCandidate = baseName;
+
+        while (Files.exists(Paths.get(directory, fileNameCandidate))) {
+            fileNameCandidate = baseName.replace(".jpg", "(" + counter.incrementAndGet() + ").jpg");
         }
+
+        return fileNameCandidate;
     }
 
     /**
