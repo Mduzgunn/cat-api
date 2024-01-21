@@ -88,10 +88,13 @@ POST http://localhost:8080/api/clean/perform?directory=b
 ![](src/main/resources/app-images/appSS.png "main page")
 
 **Veri listesi:**
+
 ![](src/main/resources/app-images/appSSdb.png "app db list")
 
 **PostgreSQL:**
+
 ![](src/main/resources/app-images/dbSS.png "db")
 
 **Coverage Results:**
+
 ![](src/main/resources/app-images/coverageResult.png "coverage")
